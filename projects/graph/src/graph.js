@@ -1,11 +1,8 @@
-/**
- * Edge
- */
 export class Edge {
   // !!! IMPLEMENT ME
   constructor(destination, weight = 1) {
-    this.weight = weight;
     this.destination = destination;
+    this.weight = weight;
   }
 }
 
@@ -15,9 +12,10 @@ export class Edge {
 export class Vertex {
   // !!! IMPLEMENT ME
   constructor(value = 'vertex', pos = { x: -1, y: -1 }) {
-    this.edges = [];
     this.value = value;
+    this.edges = [];
     this.pos = pos;
+    this.fillColor = 'white';
   }
 }
 
@@ -28,35 +26,28 @@ export class Graph {
   constructor() {
     this.vertexes = [];
   }
+
   debugCreateTestData() {
-    let debugVert1 = new Vertex('dV1', { x: 50, y: 50 });
-    let debugVert2 = new Vertex('dV2', { x: 100, y: 100 });
-    let debugVert3 = new Vertex('dV3', { x: 200, y: 150 });
-    let debugVert4 = new Vertex('dV4', { x: 40, y: 400 });
-    let debugVert5 = new Vertex('dV5', { x: 400, y: 50 });
-    let debugVert6 = new Vertex('dV6', { x: 500, y: 500 });
-    let debugVert7 = new Vertex('dV7', { x: 250, y: 450 });
+    let debugVert1 = new Vertex('dV1', { x: 250, y: 20 });
+    let debugVert2 = new Vertex('dV2', { x: 200, y: 100 });
+    let debugVert3 = new Vertex('dV3', { x: 300, y: 100 });
+    let debugVert4 = new Vertex('dV4', { x: 175, y: 200 });
+    let debugVert5 = new Vertex('dV5', { x: 225, y: 200 });
 
-    // to test our edge let's make a debug edge arbitrarily
-    // that connects node one and node two
-    // to do that we need to create an edge that belonds to debugVert1
-    // and has a destination of debugVert2, which by our definition of our
-    // edge class, is all we need to say that you go from one to two
-    let edge1 = new Edge(debugVert2);
-    let edge2 = new Edge(debugVert4);
-    let edge3 = new Edge(debugVert7);
-    debugVert1.edges.push(edge1);
-    debugVert2.edges.push(edge2);
-    debugVert3.edges.push(edge3);
-    //console.log check here>>>
+    let debugEdge1 = new Edge(debugVert2);
+    let debugEdge2 = new Edge(debugVert3);
+    let debugEdge3 = new Edge(debugVert4);
+    let debugEdge4 = new Edge(debugVert5);
+    debugVert1.edges.push(debugEdge1, debugEdge2);
+    debugVert2.edges.push(debugEdge3, debugEdge4);
 
-    this.vertexes.push(debugVert1);
-    this.vertexes.push(debugVert2);
-    this.vertexes.push(debugVert3);
-    this.vertexes.push(debugVert4);
-    this.vertexes.push(debugVert5);
-    this.vertexes.push(debugVert6);
-    this.vertexes.push(debugVert7);
+    this.vertexes.push(
+      debugVert1,
+      debugVert2,
+      debugVert3,
+      debugVert4,
+      debugVert5
+    );
   }
   /**
    * Create a random graph
@@ -64,9 +55,8 @@ export class Graph {
   randomize(width, height, pxBox, probability = 0.6) {
     // Helper function to set up two-way edges
     function connectVerts(v0, v1) {
-      let random = Math.floor(Math.random() * 5);
-      v0.edges.push(new Edge(v1, random));
-      v1.edges.push(new Edge(v0, random));
+      v0.edges.push(new Edge(v1));
+      v1.edges.push(new Edge(v0));
     }
 
     let count = 0;
@@ -148,8 +138,35 @@ export class Graph {
   /**
    * BFS
    */
-  bfs(start) {
-    // !!! IMPLEMENT ME
+  bfs(start, queue = [], visited = []) {
+    const queueToVisit = queue;
+    const nodesVisited = visited;
+
+    nodesVisited.push(start);
+    start.fillColor = this.getRandomColor(); //get random color
+
+    for (let edge of start.edges) {
+      if (
+        queueToVisit.indexOf(edge.destination) === -1 &&
+        visited.indexOf(edge.destination) === -1
+      ) {
+        queueToVisit.push(edge.destination);
+      }
+    }
+
+    if (queueToVisit.length > 0) {
+      return this.bfs(queueToVisit[0], queueToVisit.slice(1), nodesVisited);
+    } else {
+      //get the first unconnected next node
+      return nodesVisited;
+    }
+  }
+
+  getRandomColor() {
+    const r = (Math.random() * 255) | 0;
+    const g = (Math.random() * 255) | 0;
+    const b = (Math.random() * 255) | 0;
+    return 'rgb(' + r + ', ' + g + ', ' + b + ')';
   }
 
   /**

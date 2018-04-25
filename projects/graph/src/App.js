@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Graph } from './graph';
 import './App.css';
-import './graph';
 
 // !!! IMPLEMENT ME
 const canvasWidth = 750;
 const canvasHeight = 600;
+
 const vertexRadius = 20;
 
 /**
@@ -33,42 +33,39 @@ class GraphView extends Component {
     let canvas = this.refs.canvas;
     let ctx = canvas.getContext('2d');
 
-    // Clear it
-    ctx.fillStyle = 'grey';
+    //create canvas background
+    ctx.fillStyle = 'lightgray';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    // REMEMBER: Draw lines first!
 
-    for (let vertex of this.props.graph.vertexes) {
-      for (let edge of vertex.edges) {
-        ctx.moveTo(vertex.pos.x, vertex.pos.y);
-        ctx.lineTo(edge.destination.pos.x, edge.destination.pos.y);
+    // check to see we have our vertexes
+    //console.log(this.props.graph.vertexes);
+    //console.log(this.props.graph.vertexes[0].edges[0]);
+
+    //draw the edge
+    for (let parentVert of this.props.graph.vertexes) {
+      for (let parentEdges of parentVert.edges) {
+        ctx.moveTo(parentVert.pos.x, parentVert.pos.y);
+        ctx.lineTo(
+          parentEdges.destination.pos.x,
+          parentEdges.destination.pos.y
+        );
         ctx.stroke();
       }
     }
-
-    for (let vertex of this.props.graph.vertexes) {
-      // draw the circle
-      ctx.moveTo(vertex.pos.x, vertex.pos.y);
+    // create nodes from debug creator in graph.js
+    for (const parentVert of this.props.graph.vertexes) {
+      ctx.moveTo(parentVert.pos.x, parentVert.pos.y);
       ctx.beginPath();
-      ctx.arc(vertex.pos.x, vertex.pos.y, vertexRadius, 0, Math.PI * 2);
+      ctx.arc(parentVert.pos.x, parentVert.pos.y, vertexRadius, 0, 2 * Math.PI);
       ctx.stroke();
-
-      // fill node white
-      ctx.fillStyle = 'white';
+      ctx.fillStyle = parentVert.fillColor;
       ctx.fill();
-      //draw text on screen
-      ctx.font = '10px Arial';
+      ctx.font = '12px Arial';
       ctx.fillStyle = 'black';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
-      ctx.fillText(vertex.value, vertex.pos.x, vertex.pos.y);
+      ctx.fillText(parentVert.value, parentVert.pos.x, parentVert.pos.y);
     }
-
-    // !!! IMPLEMENT ME
-    // compute connected components
-    // draw edges
-    // draw verts
-    // draw vert values (labels)
   }
 
   /**
@@ -90,17 +87,18 @@ class App extends Component {
       graph: new Graph()
     };
 
-    // !!! IMPLEMENT ME
-    // use the graph randomize() method
-    this.randomizeGraph = this.randomizeGraph.bind(this);
-    this.state.graph.randomize(5, 4, 150, 0.6);
+    //this.state.graph.debugCreateTestData();
+    this.state.graph.randomize(3, 3, 80, 0.45);
+    let ans = this.state.graph.bfs(this.state.graph.vertexes[0]);
+    if (ans.length < this.state.graph.vertexes.length) {
+      for (let vertex of this.state.graph.vertexes) {
+        if (vertex.fillColor === 'white') {
+          ans = this.state.graph.bfs(vertex);
+        }
+      }
+    }
   }
 
-  randomizeGraph() {
-    const newGraph = new Graph();
-    newGraph.randomize(5, 4, 150, 0.6);
-    this.setState({ graph: newGraph });
-  }
   render() {
     return (
       <div className="App">
