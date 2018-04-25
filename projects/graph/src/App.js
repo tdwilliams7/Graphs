@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { Graph } from './graph';
 import './App.css';
+import './graph';
 
 // !!! IMPLEMENT ME
-// const canvasWidth = 
-// const canvasHeight = 
+const canvasWidth = 750;
+const canvasHeight = 600;
+const vertexRadius = 20;
 
 /**
  * GraphView
@@ -30,10 +32,37 @@ class GraphView extends Component {
   updateCanvas() {
     let canvas = this.refs.canvas;
     let ctx = canvas.getContext('2d');
-    
+
     // Clear it
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'grey';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    // REMEMBER: Draw lines first!
+
+    for (let vertex of this.props.graph.vertexes) {
+      for (let edge of vertex.edges) {
+        ctx.moveTo(vertex.pos.x, vertex.pos.y);
+        ctx.lineTo(edge.destination.pos.x, edge.destination.pos.y);
+        ctx.stroke();
+      }
+    }
+
+    for (let vertex of this.props.graph.vertexes) {
+      // draw the circle
+      ctx.moveTo(vertex.pos.x, vertex.pos.y);
+      ctx.beginPath();
+      ctx.arc(vertex.pos.x, vertex.pos.y, vertexRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // fill node white
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      //draw text on screen
+      ctx.font = '10px Arial';
+      ctx.fillStyle = 'black';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.fillText(vertex.value, vertex.pos.x, vertex.pos.y);
+    }
 
     // !!! IMPLEMENT ME
     // compute connected components
@@ -41,15 +70,14 @@ class GraphView extends Component {
     // draw verts
     // draw vert values (labels)
   }
-  
+
   /**
    * Render
    */
   render() {
-    return <canvas ref="canvas" width={canvasWidth} height={canvasHeight}></canvas>;
+    return <canvas ref="canvas" width={canvasWidth} height={canvasHeight} />;
   }
 }
-
 
 /**
  * App
@@ -64,12 +92,19 @@ class App extends Component {
 
     // !!! IMPLEMENT ME
     // use the graph randomize() method
+    this.randomizeGraph = this.randomizeGraph.bind(this);
+    this.state.graph.randomize(5, 4, 150, 0.6);
   }
 
+  randomizeGraph() {
+    const newGraph = new Graph();
+    newGraph.randomize(5, 4, 150, 0.6);
+    this.setState({ graph: newGraph });
+  }
   render() {
     return (
       <div className="App">
-        <GraphView graph={this.state.graph}></GraphView>
+        <GraphView graph={this.state.graph} />
       </div>
     );
   }
